@@ -16,6 +16,9 @@ const Register = () => {
     const [isCameraActive, setIsCameraActive] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
 
+    // OTR is ONLY for Students — Admin and Verifier get a direct registration form
+    const isOTR = formData.role === 'Student';
+
     const startCamera = async () => {
         setIsCameraActive(true);
         try {
@@ -46,11 +49,6 @@ const Register = () => {
         }, 3000); // 3 second simulation
     };
 
-    // If it's a non-student role, we treat it as a "Portal Registration" instead of OTR
-    // OTR is strictly for Students.
-    // User requested OTR flow for all roles.
-    const isOTR = true;
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
@@ -58,10 +56,10 @@ const Register = () => {
         try {
             await register(formData.name, formData.email, formData.password, formData.role, formData.mobile);
             if (isOTR) {
-                setStep(3); // Move to eKYC step on success
+                setStep(3); // Move to eKYC step on success (Student only)
             } else {
-                // Direct redirect for admin/verifier
-                alert('Registration Successful! Please Login.');
+                // Admin / Verifier: direct redirect to login
+                alert(`${formData.role} registered successfully! Please login.`);
                 navigate('/login');
             }
         } catch (err) {
@@ -75,8 +73,6 @@ const Register = () => {
 
     const nextStep = () => setStep(step + 1);
     const prevStep = () => setStep(step - 1);
-
-
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-sm">
@@ -187,25 +183,15 @@ const Register = () => {
                                 </div>
                                 <div>
                                     <label className="block mb-1 text-xs font-semibold text-gray-700">Role</label>
-                                    {/* If explicit role from URL, make it read-only or hidden to prevent confusion */}
-                                    {queryRole ? (
-                                        <input
-                                            type="text"
-                                            value={formData.role}
-                                            readOnly
-                                            className="w-full border p-2 rounded bg-gray-100 text-gray-500 outline-none cursor-not-allowed"
-                                        />
-                                    ) : (
-                                        <select
-                                            className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 outline-none bg-white"
-                                            value={formData.role}
-                                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                        >
-                                            <option value="Student">Student</option>
-                                            <option value="Verifier">Verifier</option>
-                                            <option value="Admin">Admin</option>
-                                        </select>
-                                    )}
+                                    <select
+                                        className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 outline-none bg-white"
+                                        value={formData.role}
+                                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                    >
+                                        <option value="Student">Student</option>
+                                        <option value="Verifier">Verifier</option>
+                                        <option value="Admin">Admin</option>
+                                    </select>
                                 </div>
 
                                 <div className="pt-4 flex justify-between">
@@ -234,11 +220,22 @@ const Register = () => {
                             {step === 1 && (
                                 <div>
                                     <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">1. One Time Registration (OTR) Guidelines</h2>
+                                    <div className="mb-4 flex items-center gap-3">
+                                        <label className="text-xs font-semibold text-gray-700 whitespace-nowrap">Registering as:</label>
+                                        <select
+                                            className="border p-1.5 rounded text-xs focus:ring-1 focus:ring-blue-500 outline-none bg-white"
+                                            value={formData.role}
+                                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                        >
+                                            <option value="Student">Student</option>
+                                            <option value="Verifier">Verifier (Official)</option>
+                                            <option value="Admin">Admin (Official)</option>
+                                        </select>
+                                    </div>
                                     <div className="text-sm text-gray-700 space-y-4">
                                         <p><strong>1. Mandatory Requirement:</strong> One Time Registration (OTR) is mandatory.</p>
                                         <p><strong>2. Essential Requirement for OTR:</strong> Active mobile number is mandatory.</p>
                                         <p><strong>3. No payment of fee</strong> is required.</p>
-                                        {/* Simplified text for brevity as full text is in previous artifact if needed */}
                                         <div>
                                             <strong>4. Steps for Registration:</strong>
                                             <ul className="list-[upper-roman] pl-5 mt-2 space-y-1 text-gray-600 text-xs">
@@ -247,7 +244,6 @@ const Register = () => {
                                                 <li>Download NSP OTR app for Face-Authentication.</li>
                                             </ul>
                                         </div>
-
                                         <div className="mt-6 flex items-center gap-2">
                                             <input type="checkbox" id="agree" className="w-4 h-4 text-blue-600" />
                                             <label htmlFor="agree" className="text-xs text-gray-600">I have read and understood the guidelines.</label>
