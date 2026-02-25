@@ -1,10 +1,10 @@
-const redisClient = require('../config/redis');
+const OtpToken = require('../models/OtpToken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
 /**
- * Service to manage OTP lifecycle using Redis as a secure, temporary store.
- * Design Choice: We hash the OTP even in Redis to prevent "Cleartext Cache" vulnerabilities.
+ * Service to manage OTP lifecycle using MongoDB as a secure, persistent store.
+ * OTPs are hashed before storage. TTL index auto-deletes them after 5 minutes.
  */
 class OTPService {
     /**
@@ -15,66 +15,67 @@ class OTPService {
     }
 
     /**
-     * Store hashed OTP in Redis with TTL
-     * @param {string} identifier (Phone or Email)
-     * @param {string} otp 
-     * @param {number} ttlSeconds (Default 300s / 5min)
+     * Store hashed OTP in MongoDB with 5-min auto-expiry
+     * @param {string} identifier (Email or Mobile)
+     * @param {string} otp
      */
-    static async storeOTP(identifier, otp, ttlSeconds = 300) {
+    static async storeOTP(identifier, otp) {
         const hash = await bcrypt.hash(otp, 10);
-        const key = `otp:${identifier}`;
+        const cooldownUntil = new Date(Date.now() + 30 * 1000); // 30s cooldown
 
-        // Store as a hash map to include attempt counter
-        await redisClient.hset(key, {
-            hash: hash,
-            attempts: 0
-        });
-
-        await redisClient.expire(key, ttlSeconds);
-
-        // Set resend-cooldown key (30 seconds)
-        await redisClient.set(`cooldown:${identifier}`, 'true', 'EX', 30);
+        // Upsert: replace any existing OTP for this identifier
+        await OtpToken.findOneAndUpdate(
+            { identifier },
+            {
+                identifier,
+                hash,
+                attempts: 0,
+                cooldownUntil,
+                createdAt: new Date()
+            },
+            { upsert: true, new: true }
+        );
     }
 
     /**
-     * Verify OTP against hashed version in Redis
-     * @param {string} identifier 
-     * @param {string} otp 
+     * Verify OTP against hashed version in MongoDB
+     * @param {string} identifier
+     * @param {string} otp
      * @returns {boolean} isValid
      */
     static async verifyOTP(identifier, otp) {
-        const key = `otp:${identifier}`;
-        const data = await redisClient.hgetall(key);
+        const record = await OtpToken.findOne({ identifier });
 
-        if (!data || !data.hash) {
+        if (!record) {
             throw new Error('OTP expired or not found');
         }
 
-        const attempts = parseInt(data.attempts);
-        if (attempts >= 3) {
-            await redisClient.del(key);
+        if (record.attempts >= 3) {
+            await OtpToken.deleteOne({ identifier });
             throw new Error('Maximum verification attempts exceeded. Please request a new OTP.');
         }
 
-        const isMatch = await bcrypt.compare(otp, data.hash);
+        const isMatch = await bcrypt.compare(otp, record.hash);
 
         if (!isMatch) {
-            await redisClient.hincrby(key, 'attempts', 1);
+            await OtpToken.updateOne({ identifier }, { $inc: { attempts: 1 } });
             return false;
         }
 
-        // Success: Clean up
-        await redisClient.del(key);
-        await redisClient.del(`cooldown:${identifier}`);
+        // Success: delete OTP record
+        await OtpToken.deleteOne({ identifier });
         return true;
     }
 
     /**
-     * Check if user is in resend cooldown
+     * Check if user is in 30-second resend cooldown
+     * @param {string} identifier
+     * @returns {boolean}
      */
     static async isCoolingDown(identifier) {
-        const exists = await redisClient.exists(`cooldown:${identifier}`);
-        return exists === 1;
+        const record = await OtpToken.findOne({ identifier });
+        if (!record || !record.cooldownUntil) return false;
+        return record.cooldownUntil > new Date();
     }
 }
 
