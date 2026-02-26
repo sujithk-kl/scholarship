@@ -3,6 +3,7 @@ import AuthContext from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import CampusAI from '../components/CampusAI';
 import OtpInput from '../components/OtpInput';
+import { ArrowLeft, HelpCircle } from 'lucide-react';
 
 const Login = () => {
     const { sendOtp, verifyOtp } = useContext(AuthContext);
@@ -14,8 +15,10 @@ const Login = () => {
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [successMsg, setSuccessMsg] = useState('');
+    const [showTips, setShowTips] = useState(false);
 
-    const handleSendOtp = async () => {
+    const handleSendOtp = async (e) => {
+        if (e) e.preventDefault();
         if (!identifier) {
             setError('Please enter your email or mobile number.');
             return;
@@ -65,155 +68,160 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-sm relative">
-            {/* NSP Header */}
-            <header className="bg-white px-4 py-2 shadow-sm flex justify-between items-center border-b border-gray-200">
-                <div className="flex items-center gap-4">
-                    <img src="https://scholarships.gov.in/public/assets/img/new-logo.png" alt="Govt Logo" className="h-12 object-contain" onError={(e) => e.target.style.display = 'none'} />
-                    <div className="flex flex-col">
-                        <span className="text-2xl font-bold text-gray-800 tracking-tight">Smart Scholarship Portal</span>
-                        <span className="text-xs text-gray-500 font-semibold">Student Welfare Department, College Administration</span>
-                    </div>
-                </div>
-                <div className="flex items-center gap-4 text-sm font-semibold text-gray-600">
-                    <Link to="/" className="hover:text-blue-600">Home</Link>
-                    <button className="flex items-center gap-1 hover:text-blue-600">Helpdesk 🎧</button>
-                </div>
-            </header>
+        <div className="min-h-screen bg-white font-sans text-gray-900 flex">
+            {/* Left Side: Editorial/Classic Image Banner (Hidden on very small screens) */}
+            <div className="hidden lg:flex w-1/2 relative bg-gray-900 overflow-hidden">
+                <img
+                    src="https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=2070&auto=format&fit=crop"
+                    alt="University Library"
+                    className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/80"></div>
 
-
-            <div className="flex-1 container mx-auto p-4 md:p-8 flex items-center justify-center">
-                <div className="flex flex-col md:flex-row gap-8 bg-white p-6 md:p-10 rounded-2xl shadow-lg border max-w-4xl w-full">
-
-                    {/* Left Side: Login Tips */}
-                    <div className="w-full md:w-1/2 p-4">
-                        <h2 className="text-xl font-bold text-gray-700 mb-6 border-b pb-2">📋 Login Tips</h2>
-                        <ul className="space-y-4 text-sm text-gray-600 leading-relaxed list-decimal pl-5">
-                            <li>Use the <strong>email or mobile number</strong> you registered with to receive your OTP.</li>
-                            <li>OTP is valid for <strong>10 minutes</strong>. Request a new one if it expires.</li>
-                            <li>If you haven't registered yet, click <strong>"Register"</strong> below to create an account first.</li>
-                            <li>No password is required — OTP is the only authentication method.</li>
-                            <li>After successful login, you'll be redirected to your dashboard based on your role.</li>
-                        </ul>
-
-                        <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-lg">
-                            <p className="text-xs text-blue-700 font-bold mb-2">📌 Demo Accounts:</p>
-                            <div className="grid grid-cols-1 gap-1 text-xs text-blue-600">
-                                <div><span className="font-bold">Student:</span> student@example.com</div>
-                                <div><span className="font-bold">Admin:</span> admin@nsp.gov.in</div>
-                                <div><span className="font-bold">Verifier:</span> verifier@nsp.gov.in</div>
-                                <div className="text-[10px] mt-1 text-blue-500">OTP for all: <span className="font-bold">123456</span></div>
+                <div className="relative z-10 p-16 flex flex-col justify-between h-full">
+                    <div>
+                        <div className="flex items-center gap-3 mb-12">
+                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center font-serif text-2xl font-bold tracking-tighter text-gray-900">
+                                SS
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Right Side: OTP Login Form */}
-                    <div className="w-full md:w-1/2 border-t md:border-t-0 md:border-l pt-6 md:pt-0 pl-0 md:pl-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white text-lg">🔐</div>
-                            <h3 className="text-xl font-bold text-gray-800">Login with OTP</h3>
+                            <span className="text-xl font-medium tracking-wide text-white/90 uppercase letter-spacing-2">Portal</span>
                         </div>
 
-                        {error && (
-                            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-200 flex items-center gap-2">
-                                <span>⚠️</span> {error}
-                            </div>
-                        )}
+                        <h1 className="text-5xl font-serif text-white leading-tight mb-6">
+                            Smart <br />
+                            Scholarship <br />
+                            Management.
+                        </h1>
+                        <p className="text-gray-300 text-lg max-w-md leading-relaxed font-light">
+                            Empowering academic excellence through streamlined financial assistance and transparent processes.
+                        </p>
+                    </div>
 
-                        {successMsg && !error && (
-                            <div className="bg-green-50 text-green-600 p-3 rounded-lg text-sm mb-4 border border-green-200 flex items-center gap-2">
-                                <span>✅</span> {successMsg}
-                            </div>
-                        )}
+                    <div className="text-sm text-gray-400 font-light tracking-wide">
+                        &copy; 2026 Student Welfare Department. All rights reserved.
+                    </div>
+                </div>
+            </div>
 
-                        <form onSubmit={handleVerifyOtp} className="space-y-6">
-                            {/* Email Input */}
-                            <div>
-                                <label className="block text-gray-700 text-xs font-bold mb-2">
-                                    Email or Mobile Number <span className="text-red-500">*</span>
+            {/* Right Side: Clean, Classic Login Form */}
+            <div className="w-full lg:w-1/2 flex flex-col relative justify-center">
+                {/* Minimalist Top Nav */}
+                <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10">
+                    <button
+                        onClick={() => navigate('/')}
+                        className="flex items-center text-gray-400 hover:text-gray-900 transition-colors text-sm font-medium"
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                    </button>
+
+                    <div className="text-sm font-medium text-gray-500">
+                        Don't have an account? <Link to="/register" className="text-gray-900 hover:underline border-b border-gray-900 pb-0.5 ml-1">Register</Link>
+                    </div>
+                </div>
+
+                <div className="w-full max-w-md mx-auto px-6 py-12">
+                    <div className="mb-10 text-center lg:text-left">
+                        <h2 className="text-3xl font-serif text-gray-900 mb-2">Welcome back</h2>
+                        <p className="text-gray-500 text-sm">Please enter your details to sign in.</p>
+                    </div>
+
+                    {error && (
+                        <div className="bg-red-50 text-red-700 p-4 rounded-sm text-sm mb-6 border-l-4 border-red-500 font-medium">
+                            {error}
+                        </div>
+                    )}
+
+                    {successMsg && !error && (
+                        <div className="bg-emerald-50 text-emerald-700 p-4 rounded-sm text-sm mb-6 border-l-4 border-emerald-500 font-medium">
+                            {successMsg}
+                        </div>
+                    )}
+
+                    <form onSubmit={otpSent ? handleVerifyOtp : handleSendOtp} className="space-y-6">
+                        {/* Identifier Input */}
+                        <div>
+                            <label className="block text-gray-700 text-xs font-semibold uppercase tracking-wider mb-2">
+                                Email / Mobile Number
+                            </label>
+                            <input
+                                type="text"
+                                className={`w-full bg-transparent border-b-2 py-3 outline-none transition-all font-medium text-base ${otpSent ? 'border-gray-200 text-gray-400 cursor-not-allowed' : 'border-gray-300 focus:border-gray-900 text-gray-900'}`}
+                                placeholder="Enter your registered identifier"
+                                value={identifier}
+                                onChange={(e) => setIdentifier(e.target.value)}
+                                disabled={otpSent}
+                                required
+                            />
+                        </div>
+
+                        {/* OTP Input Section (Animated reveal) */}
+                        {otpSent && (
+                            <div className="animate-fade-in-up pt-4">
+                                <label className="block text-gray-700 text-xs font-semibold uppercase tracking-wider mb-4">
+                                    One-Time Password
                                 </label>
-                                <input
-                                    type="text"
-                                    className={`w-full border-2 p-3 rounded-lg outline-none transition-all ${otpSent ? 'bg-gray-100 border-gray-200 text-gray-500' : 'focus:border-green-500 border-gray-200'}`}
-                                    placeholder="Enter registered email or mobile"
-                                    value={identifier}
-                                    onChange={(e) => setIdentifier(e.target.value)}
-                                    disabled={otpSent}
-                                    required
-                                />
-                            </div>
-
-                            {!otpSent ? (
-                                <button
-                                    type="button"
-                                    onClick={handleSendOtp}
-                                    disabled={isLoading}
-                                    className="w-full bg-green-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-700 transition-all text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isLoading ? (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                                            Sending OTP...
-                                        </span>
-                                    ) : 'Send OTP'}
-                                </button>
-                            ) : (
-                                <div className="space-y-5 animate-fade-in">
-                                    {/* OTP Input */}
-                                    <div>
-                                        <label className="block text-gray-700 text-xs font-bold mb-2">
-                                            Enter 6-digit OTP <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="flex justify-center">
-                                            <OtpInput length={6} onComplete={setOtp} />
-                                        </div>
-                                    </div>
-
-                                    {/* Resend OTP */}
-                                    <div className="text-center">
-                                        <button
-                                            type="button"
-                                            onClick={handleResendOtp}
-                                            className="text-xs text-blue-600 hover:underline font-semibold"
-                                        >
-                                            Didn't receive OTP? Resend
-                                        </button>
-                                    </div>
-
-                                    {/* Change Email */}
-                                    <div className="text-center">
-                                        <button
-                                            type="button"
-                                            onClick={() => { setOtpSent(false); setOtp(''); setError(null); setSuccessMsg(''); }}
-                                            className="text-xs text-gray-500 hover:underline"
-                                        >
-                                            ← Change identifier
-                                        </button>
-                                    </div>
-
-                                    {/* Login Button */}
+                                <div className="flex justify-center mb-4">
+                                    {/* Sub-component for custom brutalist OTP styling */}
+                                    <OtpInput length={6} onComplete={setOtp} />
+                                </div>
+                                <div className="flex justify-between items-center text-xs mt-4">
                                     <button
-                                        type="submit"
-                                        disabled={isLoading || otp.length < 6}
-                                        className="w-full bg-green-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-700 transition-all text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                                        type="button"
+                                        onClick={() => { setOtpSent(false); setOtp(''); setError(null); setSuccessMsg(''); }}
+                                        className="text-gray-500 hover:text-gray-900 font-medium transition-colors"
                                     >
-                                        {isLoading ? (
-                                            <span className="flex items-center justify-center gap-2">
-                                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                                                Verifying...
-                                            </span>
-                                        ) : 'Login'}
+                                        Change Identifier
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleResendOtp}
+                                        className="text-gray-900 font-bold hover:underline"
+                                    >
+                                        Resend Code
                                     </button>
                                 </div>
-                            )}
-                        </form>
+                            </div>
+                        )}
 
-                        <div className="mt-8 text-center">
-                            <p className="text-sm text-gray-500">
-                                New user?{' '}
-                                <Link to="/register" className="text-blue-600 font-bold hover:underline">Register here</Link>
-                            </p>
+                        {/* Main Action Button */}
+                        <div className="pt-6">
+                            <button
+                                type="submit"
+                                disabled={isLoading || (otpSent && otp.length < 6)}
+                                className="w-full bg-gray-900 text-white py-4 font-semibold tracking-wide hover:bg-black transition-all disabled:bg-gray-300 disabled:cursor-not-allowed uppercase text-sm"
+                            >
+                                {isLoading ? (
+                                    <span className="flex items-center justify-center gap-3">
+                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                        Processing
+                                    </span>
+                                ) : otpSent ? 'Secure Login' : 'Continue with OTP'}
+                            </button>
                         </div>
+                    </form>
+
+                    {/* Classic Help/Tips Accordion */}
+                    <div className="mt-12 border-t border-gray-200 pt-6">
+                        <button
+                            onClick={() => setShowTips(!showTips)}
+                            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-600 hover:text-gray-900"
+                        >
+                            <span className="flex items-center"><HelpCircle className="w-4 h-4 mr-2" /> Login Help & Demo Accounts</span>
+                            <span className="text-xl font-light">{showTips ? '−' : '+'}</span>
+                        </button>
+
+                        {showTips && (
+                            <div className="mt-4 p-5 bg-gray-50 rounded-sm border border-gray-100 text-xs text-gray-600 leading-relaxed animate-fade-in-down">
+                                <p className="mb-3">We use a passwordless OTP system for enhanced security. The OTP is valid for 10 minutes.</p>
+                                <div className="font-mono text-gray-800 bg-white p-3 border border-gray-200">
+                                    <p className="font-semibold mb-2 uppercase tracking-wide text-[10px] text-gray-500">Demo Accounts</p>
+                                    <p>Stu: student@example.com</p>
+                                    <p>Adm: admin@nsp.gov.in</p>
+                                    <p>Ver: verifier@nsp.gov.in</p>
+                                    <p className="mt-2 pt-2 border-t border-gray-100 text-gray-900 font-bold">OTP: 123456</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

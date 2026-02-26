@@ -1,6 +1,8 @@
 import { useState, useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Check, Camera, ShieldCheck, UserCircle, Building } from 'lucide-react';
+import CampusAI from '../components/CampusAI';
 
 const Register = () => {
     const { register } = useContext(AuthContext);
@@ -75,327 +77,362 @@ const Register = () => {
     const prevStep = () => setStep(step - 1);
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-sm">
-            {/* Header matching NSP */}
-            <header className="bg-white px-6 py-3 shadow-sm flex justify-between items-center border-b">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-md">SS</div>
-                    <div className="flex flex-col">
-                        <span className="text-xl font-bold text-blue-900 tracking-tight">Smart Scholarship</span>
-                        <span className="text-[10px] text-gray-500 uppercase tracking-widest">Management System</span>
+        <div className="min-h-screen relative font-sans text-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-blue-200">
+            {/* Soft Modern Mesh Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-white pointer-events-none -z-20"></div>
+
+            {/* Subtle floating background orbs */}
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-100/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob -z-10"></div>
+            <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-100/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000 -z-10"></div>
+            <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-pink-100/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000 -z-10"></div>
+
+            {/* Top Navigation */}
+            <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-20">
+                <button
+                    onClick={() => navigate('/')}
+                    className="flex items-center text-gray-500 hover:text-gray-900 transition-colors text-sm font-semibold bg-white/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/60 shadow-sm"
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Return Home
+                </button>
+
+                <div className="bg-white/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/60 shadow-sm text-sm font-medium text-gray-600">
+                    Existing user? <Link to="/login" className="text-blue-600 font-bold hover:underline ml-1">Log In</Link>
+                </div>
+            </div>
+
+            <div className="sm:mx-auto sm:w-full sm:max-w-[600px] z-10 pt-10">
+
+                {/* Brand Header */}
+                <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-lg mb-6">
+                        <span className="text-2xl font-bold tracking-tighter text-white">SS</span>
                     </div>
-                </div>
-                <div className="flex text-xs text-gray-500 gap-4">
-                    <Link to="/" className="hover:text-blue-600">Home</Link>
-                    <span>Helpdesk 🎧</span>
-                </div>
-            </header>
-
-            <div className="container mx-auto p-4 md:p-8 flex-1">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800">
-                        {isOTR ? 'Student Registration (OTR)' : `${formData.role} Registration`}
-                    </h1>
-                    <div className="text-sm">
-                        Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Login</Link>
-                    </div>
+                    <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                        {isOTR ? 'Student Registration' : 'Official Portal Setup'}
+                    </h2>
+                    <p className="mt-2 text-sm text-gray-500 font-medium">
+                        {isOTR ? 'Create your One-Time Registration (OTR) profile.' : 'Establish your secure administrative credentials.'}
+                    </p>
                 </div>
 
-                {/* Stepper - ONLY for OTR (Students) */}
-                {isOTR && (
-                    <div className="flex justify-center mb-8">
-                        <div className="flex items-center w-full max-w-3xl">
-                            {['Guidelines', 'Register Mobile No.', 'eKYC', 'Finish'].map((label, index) => {
-                                const stepNum = index + 1;
-                                const isActive = step >= stepNum;
-                                const isCurrent = step === stepNum;
+                {/* Floating Glass Panel */}
+                <div className="bg-white/70 backdrop-blur-2xl py-8 px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-3xl sm:px-10 border border-white/60 relative overflow-hidden">
 
-                                return (
-                                    <div key={index} className="flex-1 flex items-center relative">
-                                        <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${isActive ? 'bg-gray-400 text-white border-gray-400' : 'bg-white text-gray-400 border-gray-300'} z-10 transition-colors`}>
-                                            {isActive ? '✓' : stepNum}
+                    {/* Stepper Wizard (Inside Panel, OTR Only) */}
+                    {isOTR && step < 4 && (
+                        <div className="mb-10 pt-2">
+                            <div className="flex items-center justify-between relative px-2 mb-2">
+                                {/* Backtrack line */}
+                                <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-1 bg-gray-100 rounded-full -z-10"></div>
+                                {/* Progress line */}
+                                <div className={`absolute left-6 top-1/2 -translate-y-1/2 h-1 bg-blue-600 rounded-full -z-10 transition-all duration-500 ease-out ${step === 2 ? 'w-[40%]' : step === 3 ? 'w-[80%]' : 'w-0'}`}></div>
+
+                                {[
+                                    { num: 1, label: 'Docs' },
+                                    { num: 2, label: 'Form' },
+                                    { num: 3, label: 'eKYC' }
+                                ].map((s) => (
+                                    <div key={s.num} className="flex flex-col items-center">
+                                        <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-all duration-300 shadow-sm ${step === s.num
+                                                ? 'bg-blue-600 text-white ring-4 ring-blue-100 scale-110'
+                                                : step > s.num
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-white text-gray-400 border-2 border-gray-100'
+                                            }`}>
+                                            {step > s.num ? <Check className="w-4 h-4" strokeWidth={3} /> : s.num}
                                         </div>
-                                        <span className={`ml-2 text-xs font-semibold ${isCurrent ? 'text-black' : 'text-gray-500'}`}>{stepNum}. {label}</span>
-                                        {index < 3 && (
-                                            <div className={`absolute left-0 top-1/2 w-full h-0.5 -z-0 transform translate-x-4 ${step > stepNum ? 'bg-green-500' : 'bg-gray-200'}`}></div>
-                                        )}
+                                        <span className={`mt-3 text-[10px] uppercase tracking-widest font-bold font-sans transition-colors ${step >= s.num ? 'text-blue-900' : 'text-gray-400'}`}>
+                                            {s.label}
+                                        </span>
                                     </div>
-                                );
-                            })}
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* Content Area */}
-                <div className="bg-white rounded-lg shadow-sm border p-6">
+                    {error && (
+                        <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm mb-6 border border-red-100 font-medium flex items-center gap-3 animate-fade-in-down shadow-sm">
+                            <span className="text-xl">⚠️</span> {error}
+                        </div>
+                    )}
 
-                    {/* NON-OTR FLOW (Admin/Verifier) */}
-                    {/* NON-OTR FLOW (Admin/Verifier) */}
-                    {!isOTR && (
-                        <div>
-                            <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Official Registration</h2>
-                            {error && <div className="bg-red-50 text-red-700 p-3 mb-6 rounded-lg text-sm">{error}</div>}
-                            <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
-                                <div>
-                                    <label className="block mb-1 text-xs font-semibold text-gray-700">Full Name</label>
+                    {/* Step 1 or Admin Form */}
+                    {(!isOTR || step === 2) && (
+                        <form onSubmit={handleSubmit} className="space-y-5 animate-fade-in">
+                            {!isOTR && (
+                                <div className="mb-6 bg-blue-50/50 p-2 rounded-2xl border border-blue-100 flex items-center justify-between">
+                                    <div className="flex items-center gap-3 pl-3">
+                                        <Building className="w-5 h-5 text-blue-600" />
+                                        <span className="text-sm font-bold text-blue-900">Official Role</span>
+                                    </div>
+                                    <select
+                                        className="bg-white border-0 text-sm font-bold text-gray-700 py-2 px-4 outline-none cursor-pointer rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 transition-all"
+                                        value={formData.role}
+                                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                    >
+                                        <option value="Student">Switch to Student Mode</option>
+                                        <option value="Verifier">Verifier</option>
+                                        <option value="Admin">Admin</option>
+                                    </select>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div className="md:col-span-2">
+                                    <label className="block text-gray-500 text-xs font-bold uppercase tracking-wider mb-1.5 pl-1">Full Name</label>
                                     <input
                                         type="text"
-                                        className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-                                        placeholder="Enter Full Name"
+                                        className="w-full bg-white/80 border border-gray-200 py-3.5 px-4 rounded-2xl outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all font-medium text-gray-900 shadow-sm"
+                                        placeholder="e.g. Jane Doe"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         required
                                     />
                                 </div>
-                                <div>
-                                    <label className="block mb-1 text-xs font-semibold text-gray-700">Email Address (Used for Login)</label>
+
+                                <div className="md:col-span-2">
+                                    <label className="block text-gray-500 text-xs font-bold uppercase tracking-wider mb-1.5 pl-1">Email Address</label>
                                     <input
                                         type="email"
-                                        className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-                                        placeholder="you@example.com"
+                                        className="w-full bg-white/80 border border-gray-200 py-3.5 px-4 rounded-2xl outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all font-medium text-gray-900 shadow-sm"
+                                        placeholder="name@example.com"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         required
                                     />
                                 </div>
+
                                 <div>
-                                    <label className="block mb-1 text-xs font-semibold text-gray-700">Password</label>
+                                    <label className="block text-gray-500 text-xs font-bold uppercase tracking-wider mb-1.5 pl-1">Mobile No.</label>
+                                    <input
+                                        type="tel"
+                                        className="w-full bg-white/80 border border-gray-200 py-3.5 px-4 rounded-2xl outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all font-medium text-gray-900 shadow-sm"
+                                        placeholder="10-digit number"
+                                        value={formData.mobile}
+                                        onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-gray-500 text-xs font-bold uppercase tracking-wider mb-1.5 pl-1">Set Password</label>
                                     <input
                                         type="password"
-                                        className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 outline-none"
+                                        className="w-full bg-white/80 border border-gray-200 py-3.5 px-4 rounded-2xl outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all font-medium text-gray-900 shadow-sm"
                                         placeholder="••••••••"
                                         value={formData.password}
                                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                         required
                                     />
                                 </div>
+                            </div>
 
-                                <div>
-                                    <label className="block mb-1 text-xs font-semibold text-gray-700">Mobile Number</label>
-                                    <input
-                                        type="text"
-                                        className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-                                        placeholder="Enter 10-digit Mobile No."
-                                        value={formData.mobile}
-                                        onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                                        required
-                                    />
+                            <div className="pt-6 flex items-center justify-between gap-4">
+                                {isOTR && (
+                                    <button type="button" onClick={prevStep} className="px-6 py-3.5 rounded-2xl text-gray-600 font-bold bg-white/50 border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm text-sm">
+                                        Back
+                                    </button>
+                                )}
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className={`flex-1 bg-blue-600 text-white rounded-2xl py-3.5 font-bold tracking-wide hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md text-sm ${!isOTR ? 'w-full' : ''}`}
+                                >
+                                    {isLoading ? 'Processing...' : (isOTR ? 'Save Details & Continue' : 'Create Official Account')}
+                                </button>
+                            </div>
+                        </form>
+                    )}
+
+                    {/* OTR FLOW: Step 1 (Guidelines) */}
+                    {isOTR && step === 1 && (
+                        <div className="animate-fade-in space-y-6">
+
+                            <div className="bg-white/80 border border-indigo-100 rounded-2xl p-2 shadow-sm flex items-center justify-between">
+                                <div className="flex items-center gap-3 pl-3">
+                                    <UserCircle className="w-5 h-5 text-indigo-600" />
+                                    <span className="text-sm font-bold text-indigo-900">Registration Mode</span>
                                 </div>
-                                <div>
-                                    <label className="block mb-1 text-xs font-semibold text-gray-700">Role</label>
-                                    <select
-                                        className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 outline-none bg-white"
-                                        value={formData.role}
-                                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                    >
-                                        <option value="Student">Student</option>
-                                        <option value="Verifier">Verifier</option>
-                                        <option value="Admin">Admin</option>
-                                    </select>
-                                </div>
+                                <select
+                                    className="bg-indigo-50 border-0 text-sm font-bold text-indigo-700 py-2.5 px-4 outline-none cursor-pointer rounded-xl focus:ring-2 focus:ring-indigo-300 transition-all"
+                                    value={formData.role}
+                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                >
+                                    <option value="Student">Student (OTR)</option>
+                                    <option value="Verifier">Official Verifier</option>
+                                    <option value="Admin">Portal Admin</option>
+                                </select>
+                            </div>
 
-                                <div className="pt-4 flex justify-between">
-                                    {isOTR && <button type="button" onClick={prevStep} className="text-gray-600 hover:text-gray-800 text-xs">Back</button>}
+                            <div className="bg-gray-50/80 rounded-2xl p-6 border border-gray-100 shadow-inner">
+                                <h3 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <ShieldCheck className="w-5 h-5 text-green-500" /> Pre-requisites
+                                </h3>
+                                <ul className="space-y-4 text-sm text-gray-600">
+                                    <li className="flex items-start">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 mr-3 flex-shrink-0"></div>
+                                        <span><strong className="text-gray-900">Mandatory Core:</strong> OTR is fundamentally required to apply for any scholarship.</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 mr-3 flex-shrink-0"></div>
+                                        <span><strong className="text-gray-900">Mobile Verification:</strong> An active personal phone number is strictly required for alerts.</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 mr-3 flex-shrink-0"></div>
+                                        <span><strong className="text-gray-900">Zero Cost:</strong> This platform is entirely free. Avoid any third-party fees.</span>
+                                    </li>
+                                </ul>
+                            </div>
 
-                                    <div className={`flex gap-2 ${!isOTR ? 'w-full' : ''}`}>
-                                        {isOTR && <button type="button" onClick={nextStep} className="bg-gray-200 text-gray-700 px-4 py-2 rounded text-xs hover:bg-gray-300">Skip to eKYC (Demo)</button>}
+                            <div className="flex items-start gap-3 bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">
+                                <input type="checkbox" id="agree" className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-0.5 cursor-pointer accent-blue-600" />
+                                <label htmlFor="agree" className="text-sm text-gray-700 font-medium cursor-pointer leading-tight">
+                                    I hereby confirm that I have reviewed the official guidelines mentioned above.
+                                </label>
+                            </div>
 
-                                        <button
-                                            type="submit"
-                                            disabled={isLoading}
-                                            className={`bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 text-xs disabled:opacity-50 ${!isOTR ? 'w-full' : ''}`}
-                                        >
-                                            {isLoading ? 'Registering...' : (isOTR ? 'Register & Verify eKYC' : 'Create Account')}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
+                            <button
+                                onClick={nextStep}
+                                className="w-full bg-gray-900 text-white rounded-2xl py-4 font-bold tracking-wide hover:bg-black hover:shadow-lg transition-all text-sm"
+                            >
+                                Agree & Continue
+                            </button>
                         </div>
                     )}
 
-                    {/* OTR FLOW (Student) */}
-                    {isOTR && (
-                        <>
-                            {/* Step 1: Guidelines */}
-                            {step === 1 && (
-                                <div>
-                                    <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">1. One Time Registration (OTR) Guidelines</h2>
-                                    <div className="mb-4 flex items-center gap-3">
-                                        <label className="text-xs font-semibold text-gray-700 whitespace-nowrap">Registering as:</label>
-                                        <select
-                                            className="border p-1.5 rounded text-xs focus:ring-1 focus:ring-blue-500 outline-none bg-white"
-                                            value={formData.role}
-                                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                        >
-                                            <option value="Student">Student</option>
-                                            <option value="Verifier">Verifier (Official)</option>
-                                            <option value="Admin">Admin (Official)</option>
-                                        </select>
+                    {/* OTR FLOW: Step 3 (eKYC) */}
+                    {isOTR && step === 3 && (
+                        <div className="flex flex-col items-center animate-fade-in">
+                            <div className="text-center mb-6">
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2 tracking-tight">Biometric Verification</h3>
+                                <p className="text-sm text-gray-500 font-medium">Position your face inside the frame to capture your baseline portrait.</p>
+                            </div>
+
+                            {/* Apple-esque Camera Wrapper (Squircle) */}
+                            <div className="w-full max-w-sm aspect-square bg-gray-50 rounded-[2.5rem] border-2 border-dashed border-gray-300 flex flex-col items-center justify-center p-2 mb-8 relative overflow-hidden group shadow-inner transition-colors focus-within:border-blue-400 focus-within:border-solid hover:border-gray-400">
+
+                                {!isCameraActive ? (
+                                    <div className="flex flex-col items-center text-gray-400 z-10 transition-transform group-hover:scale-110 duration-300">
+                                        <Camera className="w-16 h-16 mb-4 opacity-50 stroke-1" />
+                                        <span className="text-sm font-bold uppercase tracking-wider text-gray-500">Lens Inactive</span>
                                     </div>
-                                    <div className="text-sm text-gray-700 space-y-4">
-                                        <p><strong>1. Mandatory Requirement:</strong> One Time Registration (OTR) is mandatory.</p>
-                                        <p><strong>2. Essential Requirement for OTR:</strong> Active mobile number is mandatory.</p>
-                                        <p><strong>3. No payment of fee</strong> is required.</p>
-                                        <div>
-                                            <strong>4. Steps for Registration:</strong>
-                                            <ul className="list-[upper-roman] pl-5 mt-2 space-y-1 text-gray-600 text-xs">
-                                                <li>Once allotted an OTR, student can apply for scholarship later.</li>
-                                                <li>Upon successful registration, a reference number will be sent.</li>
-                                                <li>Download NSP OTR app for Face-Authentication.</li>
-                                            </ul>
-                                        </div>
-                                        <div className="mt-6 flex items-center gap-2">
-                                            <input type="checkbox" id="agree" className="w-4 h-4 text-blue-600" />
-                                            <label htmlFor="agree" className="text-xs text-gray-600">I have read and understood the guidelines.</label>
-                                        </div>
-                                    </div>
-                                    <div className="mt-6 flex justify-end">
-                                        <button onClick={nextStep} className="bg-gray-700 text-white px-6 py-2 rounded hover:bg-gray-800 text-xs">Next</button>
-                                    </div>
-                                </div>
-                            )}
+                                ) : (
+                                    <div className="absolute inset-2 bg-black rounded-[2rem] overflow-hidden shadow-2xl ring-4 ring-black/5">
+                                        <video
+                                            id="webcam"
+                                            autoPlay
+                                            playsInline
+                                            className={`w-full h-full object-cover transform scale-x-[-1] transition-opacity duration-500 ${isVerifying ? 'opacity-60 blur-[1px]' : 'opacity-100'}`}
+                                            onLoadedMetadata={(e) => e.target.play()}
+                                        />
 
-                            {/* Step 2: Register Mobile No */}
-                            {step === 2 && (
-                                <div>
-                                    <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">2. Register Mobile No.</h2>
-                                    {error && <div className="bg-red-50 text-red-700 p-3 mb-6 rounded-lg text-sm">{error}</div>}
-                                    <form onSubmit={handleSubmit} className="space-y-4">
-                                        <div>
-                                            <label className="block mb-1 text-xs font-semibold text-gray-700">Full Name</label>
-                                            <input
-                                                type="text"
-                                                className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-                                                placeholder="Enter Full Name"
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block mb-1 text-xs font-semibold text-gray-700">Email Address</label>
-                                            <input
-                                                type="email"
-                                                className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-                                                placeholder="you@example.com"
-                                                value={formData.email}
-                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block mb-1 text-xs font-semibold text-gray-700">Password</label>
-                                            <input
-                                                type="password"
-                                                className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-                                                placeholder="••••••••"
-                                                value={formData.password}
-                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block mb-1 text-xs font-semibold text-gray-700">Mobile Number</label>
-                                            <input
-                                                type="text"
-                                                className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-                                                placeholder="Enter 10-digit Mobile No."
-                                                value={formData.mobile}
-                                                onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                                                required
-                                            />
-                                        </div>
+                                        {/* Futuristic Minimal Scanning Overlay */}
+                                        <div className="absolute inset-0 pointer-events-none flex items-center justify-center border-[6px] border-black/20 rounded-[2rem]">
+                                            <div className="w-48 h-56 border-2 border-white/60 rounded-[3rem] opacity-70"></div>
 
-                                        <div className="pt-4 flex justify-between">
-                                            <button type="button" onClick={prevStep} className="text-gray-600 hover:text-gray-800 text-xs">Back</button>
-                                            <button
-                                                type="submit"
-                                                disabled={isLoading}
-                                                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 text-xs disabled:opacity-50"
-                                            >
-                                                {isLoading ? 'Verifying...' : 'Register & Proceed'}
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            )}
+                                            {isVerifying && (
+                                                <>
+                                                    {/* Scanning pulse */}
+                                                    <div className="absolute inset-0 bg-blue-500/20 mix-blend-overlay"></div>
+                                                    <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_20px_4px_rgba(96,165,250,0.8)] animate-[scan_2s_ease-in-out_infinite]"></div>
 
-                            {/* Step 3: eKYC Face Authentication */}
-                            {step === 3 && (
-                                <div>
-                                    <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">3. eKYC Face Authentication</h2>
-                                    <div className="flex flex-col items-center justify-center py-6">
-
-                                        {/* Face Auth Section */}
-                                        <div className="w-full max-w-md flex flex-col items-center p-6 border rounded-lg bg-gray-50 shadow-sm">
-                                            <h3 className="font-bold text-gray-700 mb-2">eKYC Face Verification</h3>
-                                            <p className="text-xs text-gray-500 mb-6 text-center">Use your camera for verification</p>
-
-                                            {!isCameraActive ? (
-                                                <div className="w-56 h-56 bg-gray-200 rounded-lg flex items-center justify-center mb-6 shadow-inner">
-                                                    <span className="text-5xl">📸</span>
-                                                </div>
-                                            ) : (
-                                                <div className="relative w-56 h-56 bg-black rounded-lg overflow-hidden mb-6 border-2 border-blue-500 shadow-md">
-                                                    <video
-                                                        id="webcam"
-                                                        autoPlay
-                                                        playsInline
-                                                        className="w-full h-full object-cover transform scale-x-[-1]"
-                                                        onLoadedMetadata={(e) => e.target.play()}
-                                                    />
-                                                    {/* Scanning Overlay */}
-                                                    <div className="absolute inset-0 bg-green-500/20 animate-pulse z-10"></div>
-                                                    <div className="absolute inset-0 flex items-center justify-center z-20">
-                                                        <span className="text-white text-xs font-bold bg-black/50 px-2 py-1 rounded">Scanning...</span>
+                                                    <div className="absolute bottom-6 bg-white/90 backdrop-blur-sm shadow-xl px-5 py-2 rounded-full border border-white flex items-center gap-3 animate-pulse">
+                                                        <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-ping"></div>
+                                                        <span className="text-xs font-bold text-gray-900 uppercase tracking-wider mt-px">Extracting Data...</span>
                                                     </div>
-                                                </div>
-                                            )}
-
-                                            {!isCameraActive ? (
-                                                <button
-                                                    onClick={() => startCamera()}
-                                                    className="bg-blue-600 text-white px-8 py-2 rounded text-sm hover:bg-blue-700 transition-colors shadow-md w-full"
-                                                >
-                                                    Start Camera
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={verifyFace} // Function to be defined
-                                                    disabled={isVerifying}
-                                                    className={`px-8 py-2 rounded text-sm transition-colors shadow-md w-full ${isVerifying ? 'bg-green-600 text-white' : 'bg-red-500 text-white hover:bg-red-600'}`}
-                                                >
-                                                    {isVerifying ? 'Verifying...' : 'Capture & Verify'}
-                                                </button>
+                                                </>
                                             )}
                                         </div>
                                     </div>
+                                )}
+                            </div>
 
-                                    <div className="mt-8 flex justify-between border-t pt-4">
-                                        <button onClick={prevStep} className="text-gray-600 hover:text-gray-800 text-xs">Back</button>
-                                        <button onClick={() => setStep(4)} className="text-blue-500 text-xs hover:underline">Skip (Demo Mode)</button>
-                                    </div>
-                                </div>
-                            )}
+                            <div className="w-full flex flex-col gap-3">
+                                {!isCameraActive ? (
+                                    <button
+                                        onClick={startCamera}
+                                        className="w-full bg-blue-600 text-white rounded-2xl py-4 font-bold hover:bg-blue-700 transition-all shadow-md text-sm"
+                                    >
+                                        Enable Camera Access
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={verifyFace}
+                                        disabled={isVerifying}
+                                        className={`w-full rounded-2xl py-4 font-bold transition-all text-sm flex items-center justify-center gap-2 ${isVerifying ? 'bg-gray-200 text-gray-400 shadow-none cursor-not-allowed' : 'bg-gray-900 text-white hover:bg-black shadow-lg hover:-translate-y-0.5'}`}
+                                    >
+                                        {isVerifying ? 'Verifying Identity...' : 'Capture & Verify Portrait'}
+                                    </button>
+                                )}
 
-                            {/* Step 4: Finish */}
-                            {step === 4 && (
-                                <div className="text-center py-10">
-                                    <div className="w-16 h-16 bg-green-100 rounded-full mx-auto flex items-center justify-center text-green-600 text-2xl mb-4">✓</div>
-                                    <h2 className="text-xl font-bold text-gray-800">Registration Successful!</h2>
-                                    <p className="text-gray-600 mt-2">Your OTR Reference Number has been generated.</p>
-                                    <div className="mt-4 bg-gray-50 p-3 rounded inline-block">
-                                        <span className="font-mono font-bold text-lg text-gray-700">OTR-{Math.floor(Math.random() * 10000000)}</span>
-                                    </div>
-                                    <div className="mt-8">
-                                        <Link to="/login" className="bg-blue-600 text-white px-8 py-2 rounded hover:bg-blue-700 text-sm">Proceed to Login</Link>
-                                    </div>
-                                </div>
-                            )}
-                        </>
+                                <button
+                                    onClick={() => setStep(4)}
+                                    className="w-full py-3 text-xs font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+                                >
+                                    Developer: Bypass Step
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* OTR FLOW: Step 4 (Finish) */}
+                    {isOTR && step === 4 && (
+                        <div className="text-center py-8 animate-fade-in-up">
+                            <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full mx-auto flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(52,211,153,0.4)] relative">
+                                <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-30"></div>
+                                <Check className="w-10 h-10 text-white" strokeWidth={3.5} />
+                            </div>
+                            <h2 className="text-3xl font-extrabold text-gray-900 mb-3 tracking-tight">Account Live!</h2>
+                            <p className="text-gray-500 text-base max-w-xs mx-auto font-medium mb-8">
+                                Identity verified successfully. Your global reference ID has been generated securely.
+                            </p>
+
+                            <div className="bg-gray-100/80 p-6 rounded-3xl border border-gray-200/60 inline-block mb-10 shadow-inner">
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Official OTR ID</p>
+                                <p className="font-mono font-bold text-3xl text-blue-600 tracking-tight selection:bg-blue-200 selection:text-blue-900">
+                                    OTR-{Math.floor(Math.random() * 10000000)}
+                                </p>
+                            </div>
+
+                            <div className="pt-4">
+                                <Link
+                                    to="/login"
+                                    className="w-full inline-block bg-gray-900 text-white rounded-2xl py-4 font-bold tracking-wide hover:bg-black hover:shadow-xl transition-all shadow-md text-sm"
+                                >
+                                    Proceed to Login Dashboard
+                                </Link>
+                            </div>
+                        </div>
                     )}
                 </div>
+
+                {/* Global Animation Styles placed here securely */}
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                    @keyframes blob {
+                        0% { transform: translate(0px, 0px) scale(1); }
+                        33% { transform: translate(30px, -50px) scale(1.1); }
+                        66% { transform: translate(-20px, 20px) scale(0.9); }
+                        100% { transform: translate(0px, 0px) scale(1); }
+                    }
+                    .animate-blob {
+                        animation: blob 7s infinite;
+                    }
+                    .animation-delay-2000 {
+                        animation-delay: 2s;
+                    }
+                    .animation-delay-4000 {
+                        animation-delay: 4s;
+                    }
+                    @keyframes scan {
+                        0% { top: 5%; opacity: 0; }
+                        10% { opacity: 1; }
+                        90% { opacity: 1; }
+                        100% { top: 95%; opacity: 0; }
+                    }
+                `}} />
             </div>
+            <CampusAI />
         </div>
     );
 };
