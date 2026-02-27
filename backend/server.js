@@ -74,7 +74,10 @@ app.use('/api/ai', require('./routes/aiRoutes'));
 
 // Initialize Services
 const { initExpiryCheck } = require('./services/expiryCheckService');
+const { initKeepAlive } = require('./services/keepAliveService');
+
 initExpiryCheck();
+initKeepAlive();
 
 // Static folder for uploads
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
