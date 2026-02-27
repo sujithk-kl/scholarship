@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import api from '../services/api';
 import AuthContext from '../context/AuthContext';
-import { CheckCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 
 const ApplicationForm = ({ onSuccess, initialData = null, isResubmission = false, isRenewal = false }) => {
     const { user } = useContext(AuthContext);
@@ -9,7 +9,6 @@ const ApplicationForm = ({ onSuccess, initialData = null, isResubmission = false
     const [formData, setFormData] = useState(initialData || {
         personalDetails: {
             phone: user?.mobile || '',
-            // Initialize other fields if needed
         },
         academicDetails: {},
         financialDetails: {}
@@ -34,12 +33,18 @@ const ApplicationForm = ({ onSuccess, initialData = null, isResubmission = false
     const eligibility = checkCurrentEligibility();
 
     const [activeTab, setActiveTab] = useState(0);
-    const tabs = ['Document upload', 'Personal Information', 'Other Information', 'Current Course', 'Past Qualification', 'Apply Scholarship'];
+    const tabs = ['Identity Verification', 'Personal Profile', 'Demographics & Income', 'Academic History', 'Financial Routing'];
 
     const handleNextTab = () => {
         if (activeTab < tabs.length - 1) {
             setActiveTab(prev => prev + 1);
-            // Optional: Scroll to top
+            window.scrollTo(0, 0);
+        }
+    };
+
+    const handlePrevTab = () => {
+        if (activeTab > 0) {
+            setActiveTab(prev => prev - 1);
             window.scrollTo(0, 0);
         }
     };
@@ -47,6 +52,7 @@ const ApplicationForm = ({ onSuccess, initialData = null, isResubmission = false
     // Auto-fill effect when user data is available
     useEffect(() => {
         if (user && !initialData) {
+            // eslint-disable-next-line
             setFormData(prev => ({
                 ...prev,
                 personalDetails: {
@@ -79,369 +85,330 @@ const ApplicationForm = ({ onSuccess, initialData = null, isResubmission = false
         data.append('academicDetails', JSON.stringify(formData.academicDetails));
         data.append('financialDetails', JSON.stringify(formData.financialDetails));
 
-        // Append all documents
-        console.log('📎 Preparing to upload documents:', Object.keys(documents));
-        let fileCount = 0;
+        if (documents.aadhar) data.append('aadhar', documents.aadhar);
+        if (documents.caste) data.append('caste', documents.caste);
+        if (documents.income) data.append('income', documents.income);
+        if (documents.bankPassbook) data.append('bankPassbook', documents.bankPassbook);
+        if (documents.marksheet) data.append('marksheet', documents.marksheet);
 
-        if (documents.aadhar) {
-            data.append('aadhar', documents.aadhar);
-            console.log('✓ Attached Aadhaar:', documents.aadhar.name);
-            fileCount++;
-        }
-        if (documents.caste) {
-            data.append('caste', documents.caste);
-            console.log('✓ Attached Caste:', documents.caste.name);
-            fileCount++;
-        }
-        if (documents.income) {
-            data.append('income', documents.income);
-            console.log('✓ Attached Income:', documents.income.name);
-            fileCount++;
-        }
-        if (documents.bankPassbook) {
-            data.append('bankPassbook', documents.bankPassbook);
-            console.log('✓ Attached Bank Passbook:', documents.bankPassbook.name);
-            fileCount++;
-        }
-        if (documents.marksheet) {
-            data.append('marksheet', documents.marksheet);
-            console.log('✓ Attached Marksheet:', documents.marksheet.name);
-            fileCount++;
-        }
-
-        // Also support generic 'documents' if needed
         Object.keys(documents).forEach(key => {
             if (!['aadhar', 'caste', 'income', 'bankPassbook', 'marksheet'].includes(key)) {
                 data.append(key, documents[key]);
-                console.log('✓ Attached', key + ':', documents[key].name);
-                fileCount++;
             }
         });
 
-        console.log(`📊 Total files to upload: ${fileCount}`);
-
         try {
             const endpoint = isResubmission ? '/student/resubmit' : isRenewal ? '/student/renew' : '/student/submit';
-            console.log('🚀 Submitting to:', endpoint);
-
-            // IMPORTANT: Don't set Content-Type header manually for FormData
-            // The browser will set it automatically with the correct boundary
             await api.post(endpoint, data, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
-
-            console.log('✅ Application submitted successfully!');
             onSuccess();
         } catch (error) {
-            console.error('❌ Submission error:', error);
+            console.error('Submission error:', error);
             alert(error.response?.data?.message || 'Submission Failed');
         }
     };
 
     if (!formData.personalDetails || !formData.academicDetails || !formData.financialDetails) {
-        return <div className="p-8 text-center">Loading Application Form...</div>;
+        return <div className="p-8 text-center font-serif italic text-indigo-500">Initializing document sequence...</div>;
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden min-h-[600px] flex flex-col">
-            {/* Header / Title */}
-            <div className="bg-yellow-400 p-4">
-                <h1 className="text-xl font-bold text-gray-800">Smart Scholarship Portal - Scholarship Application</h1>
-            </div>
+        <div className="bg-white text-gray-900 font-sans flex flex-col md:flex-row min-h-[70vh] border border-gray-100 rounded-[2rem] shadow-2xl overflow-hidden ring-1 ring-black/5">
 
-            <div className="p-8 flex-1 overflow-y-auto">
+            {/* Sidebar Navigation (Vibrant Editorial) */}
+            <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-gray-100 p-8 md:p-10 bg-gradient-to-br from-indigo-50/80 via-purple-50/50 to-pink-50/80 flex flex-col relative overflow-hidden backdrop-blur-xl">
+                {/* Decorative Blob */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-violet-400/10 rounded-full filter blur-[60px] -translate-y-1/2 translate-x-1/2"></div>
 
-
-                {/* Real-time Eligibility Banner */}
-                <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 border-l-4 transition-all duration-500 ${eligibility.isEligible
-                    ? 'bg-green-50 border-green-500 text-green-800'
-                    : 'bg-red-50 border-red-500 text-red-800'
-                    }`}>
-                    <div className="mt-1">
-                        {eligibility.isEligible
-                            ? <CheckCircle size={20} className="text-green-600" />
-                            : <AlertCircle size={20} className="text-red-600" />
-                        }
-                    </div>
-                    <div>
-                        <p className="font-bold text-sm">
-                            Real-time Eligibility Check: {eligibility.isEligible ? 'Eligible for Scholarship' : 'Check Requirements'}
-                        </p>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                            <span className={`text-xs ${eligibility.criteria.income ? 'text-green-600' : 'text-red-600'}`}>
-                                ● Income &lt; 2.5L ({eligibility.criteria.income ? 'Passed' : 'Pending'})
-                            </span>
-                            <span className={`text-xs ${eligibility.criteria.marks ? 'text-green-600' : 'text-red-600'}`}>
-                                ● Marks &gt; 60% ({eligibility.criteria.marks ? 'Passed' : 'Pending'})
-                            </span>
-                            <span className={`text-xs ${eligibility.criteria.community ? 'text-green-600' : 'text-red-600'}`}>
-                                ● Category SC/ST/OBC ({eligibility.criteria.community ? 'Passed' : 'Pending'})
-                            </span>
-                        </div>
-                    </div>
+                <div className="mb-12 relative z-10">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-violet-600/70 mb-2">Form Identifier</p>
+                    <h2 className="font-serif text-3xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-900 to-indigo-900">Application Dossier</h2>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-8">
-
-                    {/* Section 1: Document Upload (Tab 0) */}
-                    {activeTab === 0 && (
-                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Upload Aadhar Card</h2>
-                            <div className="flex items-center gap-4">
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Aadhar Card</label>
-                                    <input type="file" onChange={(e) => handleFileChange('aadhar', e)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300" />
-                                </div>
-                                <button type="button" onClick={handleNextTab} className="bg-yellow-400 text-yellow-900 px-6 py-2 rounded font-bold hover:bg-yellow-500 transition-colors shadow-sm text-sm">
-                                    Next
-                                </button>
+                <div className="flex-1 space-y-8 relative z-10">
+                    {tabs.map((tab, idx) => (
+                        <div key={idx} className="flex flex-col relative group">
+                            <div className={`flex items-center gap-4 transition-all duration-300 ${activeTab === idx ? 'text-violet-800 scale-105 origin-left' : 'text-gray-400 hover:text-violet-500'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs shadow-sm transition-all ${activeTab === idx ? 'bg-gradient-to-br from-violet-600 to-indigo-600 text-white font-bold ring-4 ring-violet-100' : 'bg-white font-medium border border-gray-200 group-hover:border-violet-300'}`}>0{idx + 1}</div>
+                                <span className={`text-sm tracking-wide ${activeTab === idx ? 'font-bold' : 'font-medium'}`}>{tab}</span>
                             </div>
+                            {/* Connector Line */}
+                            {idx < tabs.length - 1 && (
+                                <div className={`absolute left-4 top-8 bottom-[-24px] w-px transition-colors duration-500 ${activeTab > idx ? 'bg-violet-400' : 'bg-gray-200'}`} />
+                            )}
                         </div>
-                    )}
+                    ))}
+                </div>
 
-                    {/* Section 2: Personal Information (Tab 1) */}
-                    {activeTab === 1 && (
-                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Personal Details</h2>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Email</label>
-                                    <input name="email" value={formData.personalDetails.email || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm text-gray-800 outline-none" placeholder="Enter Email Address" />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Full Name</label>
-                                    <input name="fullName" value={formData.personalDetails.fullName || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm text-gray-800 outline-none" placeholder="Enter Full Name" />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Aadhaar Number</label>
-                                    <input name="aadhaarNumber" value={formData.personalDetails.aadhaarNumber || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none" placeholder="XXXX-XXXX-XXXX" />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Mobile Number</label>
-                                    <input name="phone" value={formData.personalDetails.phone || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none" placeholder="Mobile Number" required />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Date of Birth</label>
-                                    <input type="date" name="dob" value={formData.personalDetails.dob ? formData.personalDetails.dob.split('T')[0] : ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none" />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Gender</label>
-                                    <select name="gender" value={formData.personalDetails.gender || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none">
-                                        <option value="">Select Gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Father's Full Name</label>
-                                    <input name="fatherName" value={formData.personalDetails.fatherName || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none uppercase" placeholder="Enter Father's Name" required />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Mother's Full Name</label>
-                                    <input name="motherName" value={formData.personalDetails.motherName || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none uppercase" placeholder="Enter Mother's Name" required />
-                                </div>
-                            </div>
-
-                            <div className="mb-4">
-                                <label className="block text-gray-600 text-sm mb-1">Address</label>
-                                <textarea name="address" value={formData.personalDetails.address || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none" rows="2" placeholder="Enter Permanent Address"></textarea>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">State</label>
-                                    <input name="state" value={formData.personalDetails.state || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none" placeholder="State" />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">District</label>
-                                    <input name="district" value={formData.personalDetails.district || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none" placeholder="District" />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Taluka</label>
-                                    <input name="taluka" value={formData.personalDetails.taluka || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none" placeholder="Taluka" />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Pin Code</label>
-                                    <input name="pincode" value={formData.personalDetails.pincode || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none" placeholder="Pin Code" />
-                                </div>
-                            </div>
-
-                            <button type="button" onClick={handleNextTab} className="mt-4 bg-yellow-400 text-yellow-900 px-6 py-2 rounded font-bold hover:bg-yellow-500 transition-colors shadow-sm text-sm">
-                                Next
-                            </button>
+                {/* Eligibility Widget embedded in sidebar */}
+                <div className="mt-12 relative z-10">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-violet-600/70 mb-3 block">System Predicament</p>
+                    <div className={`rounded-3xl p-5 shadow-lg relative overflow-hidden transition-all duration-500 ${eligibility.isEligible ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white scale-[1.02]' : 'bg-white border border-gray-100 text-gray-800'}`}>
+                        {eligibility.isEligible && <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>}
+                        <div className="flex items-center gap-2 mb-3 relative z-10">
+                            {eligibility.isEligible ? <CheckCircle size={18} className="text-white drop-shadow-md" /> : <AlertCircle size={18} className="text-amber-500" />}
+                            <span className="font-serif text-sm font-medium">{eligibility.isEligible ? 'Eligible Status' : 'Pending Verification'}</span>
                         </div>
-                    )}
+                        <ul className={`space-y-1.5 text-[10px] font-mono tracking-wide relative z-10 ${eligibility.isEligible ? 'text-emerald-50' : 'text-gray-500'}`}>
+                            <li className="flex justify-between"><span>INC_CHK:</span> <span className="font-bold">{eligibility.criteria.income ? 'PASS' : 'PENDING'}</span></li>
+                            <li className="flex justify-between"><span>ACA_CHK:</span> <span className="font-bold">{eligibility.criteria.marks ? 'PASS' : 'PENDING'}</span></li>
+                            <li className="flex justify-between"><span>DEM_CHK:</span> <span className="font-bold">{eligibility.criteria.community ? 'PASS' : 'PENDING'}</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-                    {/* Section 3: Other Information (Tab 2) - Merging Caste & Domicile here or keeping separate? 
-                       The tabs list is: Document upload, Personal Info, Other Info, Current Course, Past Qual, Apply Scholarship. 
-                       I will map Caste/Domicile/Income to 'Other Information' for now, or split roughly.
-                    */}
-                    {activeTab === 2 && (
-                        <div className="space-y-6">
-                            {/* Caste Details */}
-                            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                                <h3 className="text-md font-bold mb-4 text-gray-700">Caste Details</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
-                                    <div>
-                                        <label className="block text-gray-600 text-sm mb-1">Caste Category</label>
-                                        <select name="casteCategory" value={formData.personalDetails.casteCategory || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none">
-                                            <option value="">Select Category</option>
-                                            <option value="General">General</option>
-                                            <option value="OBC">OBC</option>
-                                            <option value="SC">SC</option>
-                                            <option value="ST">ST</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-gray-600 text-sm mb-1">Caste</label>
-                                        <input name="caste" value={formData.personalDetails.caste || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full bg-gray-100 border p-2 rounded text-sm outline-none" placeholder="Enter Caste" />
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4 mt-2">
-                                    <div className="flex-1">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Upload Caste Certificate</label>
-                                        <input type="file" onChange={(e) => handleFileChange('caste', e)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300" />
-                                    </div>
-                                </div>
-                            </div>
+            {/* Main Form Area */}
+            <div className="w-full md:w-2/3 p-8 md:p-14 relative bg-white">
+                <form onSubmit={handleSubmit} className="flex flex-col h-full">
+                    <div className="flex-1">
 
-                            {/* Domicile */}
-                            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                                <h2 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Domicile Information</h2>
-                                <div className="flex flex-col gap-4">
+                        {/* Tab 1: Identity */}
+                        {activeTab === 0 && (
+                            <div className="animate-fade-in-up">
+                                <div className="mb-10 border-b border-gray-100 pb-6 flex items-end gap-4">
+                                    <h3 className="font-serif text-4xl tracking-tight text-gray-900 leading-none">Identity Verification</h3>
+                                    <span className="text-violet-600 font-mono font-bold text-sm bg-violet-50 px-2 py-1 rounded-md mb-1">01</span>
+                                </div>
+                                <div className="space-y-10">
+                                    <div className="group">
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Aadhaar Identification Number</label>
+                                        <input name="aadhaarNumber" value={formData.personalDetails.aadhaarNumber || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b-2 border-gray-200 py-3 text-2xl outline-none focus:border-violet-500 transition-colors bg-transparent placeholder-gray-300 font-medium text-gray-900 group-hover:border-violet-300" placeholder="XXXX XXXX XXXX" />
+                                    </div>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700 mb-2">Are you a domicile of Tamil Nadu?</p>
-                                        <div className="flex gap-4">
-                                            <label className="flex items-center gap-2"><input type="radio" name="isDomicile" /> Yes</label>
-                                            <label className="flex items-center gap-2"><input type="radio" name="isDomicile" /> No</label>
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 border-none p-0">Official Aadhaar Document</label>
+                                        <div className="border border-dashed border-violet-200 bg-violet-50/30 rounded-3xl p-8 flex items-center justify-center hover:bg-violet-50 transition-colors cursor-pointer relative group">
+                                            <input type="file" onChange={(e) => handleFileChange('aadhar', e)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                                            <span className="text-sm font-bold uppercase tracking-widest text-violet-700 group-hover:scale-105 transition-transform">{documents.aadhar ? documents.aadhar.name : 'Select PDF / Image'}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        )}
 
-                            {/* Income */}
-                            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                                <h2 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Income Information</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                                    <div>
-                                        <label className="block text-gray-600 text-sm mb-1">Family Annual Income (₹)</label>
-                                        <input
-                                            name="annualIncome"
-                                            type="number"
-                                            value={formData.financialDetails.annualIncome || ''}
-                                            onChange={(e) => handleChange('financialDetails', e)}
-                                            className="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-yellow-400 outline-none"
-                                            placeholder="Enter Annual Income"
-                                            required
-                                        />
+                        {/* Tab 2: Personal Profile */}
+                        {activeTab === 1 && (
+                            <div className="animate-fade-in-up">
+                                <div className="mb-10 border-b border-gray-100 pb-6 flex items-end gap-4">
+                                    <h3 className="font-serif text-4xl tracking-tight text-gray-900 leading-none">Personal Profile</h3>
+                                    <span className="text-violet-600 font-mono font-bold text-sm bg-violet-50 px-2 py-1 rounded-md mb-1">02</span>
+                                </div>
+                                <div className="space-y-10">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                        <div className="group">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Full Legal Name</label>
+                                            <input name="fullName" value={formData.personalDetails.fullName || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b-2 border-gray-200 py-2 text-xl outline-none focus:border-violet-500 bg-transparent font-serif group-hover:border-violet-300 transition-colors" placeholder="John Doe" />
+                                        </div>
+                                        <div className="group">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Email Address</label>
+                                            <input name="email" value={formData.personalDetails.email || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b-2 border-gray-200 py-2 text-xl outline-none focus:border-violet-500 bg-transparent font-serif group-hover:border-violet-300 transition-colors" placeholder="name@domain.com" />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                        <div className="group">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Mobile Number</label>
+                                            <input name="phone" value={formData.personalDetails.phone || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b-2 border-gray-200 py-2 text-xl outline-none focus:border-violet-500 bg-transparent font-serif group-hover:border-violet-300 transition-colors" required />
+                                        </div>
+                                        <div className="group">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Date of Birth</label>
+                                            <input type="date" name="dob" value={formData.personalDetails.dob ? formData.personalDetails.dob.split('T')[0] : ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b-2 border-gray-200 py-2 text-xl outline-none focus:border-violet-500 bg-transparent font-serif text-gray-600 cursor-pointer group-hover:border-violet-300 transition-colors" />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                        <div className="group">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Gender</label>
+                                            <select name="gender" value={formData.personalDetails.gender || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b-2 border-gray-200 py-2 text-lg outline-none focus:border-violet-500 bg-transparent text-gray-600 cursor-pointer group-hover:border-violet-300 transition-colors">
+                                                <option value=""></option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div className="group">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Father's Name</label>
+                                            <input name="fatherName" value={formData.personalDetails.fatherName || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b-2 border-gray-200 py-2 text-lg outline-none focus:border-violet-500 bg-transparent uppercase group-hover:border-violet-300 transition-colors" required />
+                                        </div>
+                                        <div className="group">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Mother's Name</label>
+                                            <input name="motherName" value={formData.personalDetails.motherName || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b-2 border-gray-200 py-2 text-lg outline-none focus:border-violet-500 bg-transparent uppercase group-hover:border-violet-300 transition-colors" required />
+                                        </div>
+                                    </div>
+
+                                    <div className="group">
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Permanent Address</label>
+                                        <textarea name="address" value={formData.personalDetails.address || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b-2 border-gray-200 py-2 text-lg outline-none focus:border-violet-500 bg-transparent group-hover:border-violet-300 transition-colors" rows="1" placeholder="Street, City, State..."></textarea>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50/50 p-6 rounded-3xl border border-gray-100">
+                                        <div><input name="state" value={formData.personalDetails.state || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b border-gray-300 py-2 text-sm outline-none focus:border-violet-500 bg-transparent placeholder-gray-400 border-none p-0" placeholder="State/Region" /></div>
+                                        <div><input name="district" value={formData.personalDetails.district || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b border-gray-300 py-2 text-sm outline-none focus:border-violet-500 bg-transparent placeholder-gray-400 border-none p-0" placeholder="District" /></div>
+                                        <div><input name="taluka" value={formData.personalDetails.taluka || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b border-gray-300 py-2 text-sm outline-none focus:border-violet-500 bg-transparent placeholder-gray-400 border-none p-0" placeholder="Taluka" /></div>
+                                        <div><input name="pincode" value={formData.personalDetails.pincode || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b border-gray-300 py-2 text-sm outline-none focus:border-violet-500 bg-transparent placeholder-gray-400 font-mono tracking-widest border-none p-0" placeholder="Postal Code" /></div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col gap-4">
-                                    <div className="flex items-center gap-4 mt-2">
-                                        <div className="flex-1">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Upload Income Certificate</label>
-                                            <input type="file" onChange={(e) => handleFileChange('income', e)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300" />
+                            </div>
+                        )}
+
+                        {/* Tab 3: Demographics & Income */}
+                        {activeTab === 2 && (
+                            <div className="animate-fade-in-up">
+                                <div className="mb-10 border-b border-gray-100 pb-6 flex items-end gap-4">
+                                    <h3 className="font-serif text-4xl tracking-tight text-gray-900 leading-none">Demographics</h3>
+                                    <span className="text-violet-600 font-mono font-bold text-sm bg-violet-50 px-2 py-1 rounded-md mb-1">03</span>
+                                </div>
+                                <div className="space-y-12">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                        <div className="group">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Category</label>
+                                            <select name="casteCategory" value={formData.personalDetails.casteCategory || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b-2 border-gray-200 py-2 text-xl outline-none focus:border-violet-500 bg-transparent cursor-pointer text-gray-800 group-hover:border-violet-300 transition-colors">
+                                                <option value=""></option>
+                                                <option value="General">General</option>
+                                                <option value="OBC">OBC</option>
+                                                <option value="SC">SC</option>
+                                                <option value="ST">ST</option>
+                                            </select>
+                                        </div>
+                                        <div className="group">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Specific Caste</label>
+                                            <input name="caste" value={formData.personalDetails.caste || ''} onChange={(e) => handleChange('personalDetails', e)} className="w-full border-b-2 border-gray-200 py-2 text-xl outline-none focus:border-violet-500 bg-transparent font-serif group-hover:border-violet-300 transition-colors" />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 border-none p-0">Caste Certificate Document</label>
+                                        <div className="border border-dashed border-violet-200 bg-violet-50/30 rounded-3xl p-6 flex items-center justify-center hover:bg-violet-50 transition-colors cursor-pointer relative group">
+                                            <input type="file" onChange={(e) => handleFileChange('caste', e)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                                            <span className="text-sm font-bold uppercase tracking-widest text-violet-700 group-hover:scale-105 transition-transform">{documents.caste ? documents.caste.name : 'Select PDF / Image'}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-10 border-t border-gray-100 relative">
+                                        <div className="absolute top-0 left-0 w-16 h-1 bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full -translate-y-[1px]"></div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                            <div className="group border-l-4 border-violet-500 pl-6 py-2 bg-gradient-to-r from-violet-50/50 to-transparent rounded-r-3xl">
+                                                <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 transition-colors border-none p-0">Declared Annual Income (₹)</label>
+                                                <input name="annualIncome" type="number" value={formData.financialDetails.annualIncome || ''} onChange={(e) => handleChange('financialDetails', e)} className="w-full border-none py-2 text-4xl font-serif text-violet-900 outline-none bg-transparent m-0 p-0" required />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 border-none p-0">Proof of Income Document</label>
+                                        <div className="border border-dashed border-emerald-200 bg-emerald-50/30 rounded-3xl p-6 flex items-center justify-center hover:bg-emerald-50 transition-colors cursor-pointer relative group">
+                                            <input type="file" onChange={(e) => handleFileChange('income', e)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                                            <span className="text-sm font-bold uppercase tracking-widest text-emerald-700 group-hover:scale-105 transition-transform">{documents.income ? documents.income.name : 'Select PDF / Image'}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        )}
 
-                            <button type="button" onClick={handleNextTab} className="bg-yellow-400 text-yellow-900 px-6 py-2 rounded font-bold hover:bg-yellow-500 transition-colors shadow-sm text-sm">
-                                Next
+                        {/* Tab 4: Academic */}
+                        {activeTab === 3 && (
+                            <div className="animate-fade-in-up">
+                                <div className="mb-10 border-b border-gray-100 pb-6 flex items-end gap-4">
+                                    <h3 className="font-serif text-4xl tracking-tight text-gray-900 leading-none">Academic History</h3>
+                                    <span className="text-violet-600 font-mono font-bold text-sm bg-violet-50 px-2 py-1 rounded-md mb-1">04</span>
+                                </div>
+                                <div className="space-y-12">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-slate-50 border border-slate-100 p-8 rounded-[2.5rem]">
+                                        <div className="group border-b border-slate-200 pb-4 md:border-b-0 md:pb-0 md:border-r md:pr-4">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-slate-500 mb-2 transition-colors border-none p-0">Previous Year Grade (%)</label>
+                                            <input name="previousYearPercentage" type="number" value={formData.academicDetails.previousYearPercentage || ''} onChange={(e) => handleChange('academicDetails', e)} className="w-full border-none py-2 text-5xl font-serif outline-none bg-transparent text-slate-800 placeholder-slate-300 m-0 p-0" placeholder="0.0" required />
+                                        </div>
+                                        <div className="group pl-0 md:pl-4">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-slate-500 mb-2 transition-colors border-none p-0">Attendance Ratio (%)</label>
+                                            <input name="attendancePercentage" type="number" value={formData.academicDetails.attendancePercentage || ''} onChange={(e) => handleChange('academicDetails', e)} className="w-full border-none py-2 text-5xl font-serif outline-none bg-transparent text-slate-800 placeholder-slate-300 m-0 p-0" placeholder="0.0" required />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 border-none p-0">Certified Marksheet Extract</label>
+                                        <div className="border border-dashed border-violet-200 bg-violet-50/30 rounded-3xl p-10 flex items-center justify-center hover:bg-violet-50 transition-colors cursor-pointer relative group">
+                                            <input type="file" onChange={(e) => handleFileChange('marksheet', e)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                                            <span className="text-sm font-bold uppercase tracking-widest text-violet-700 group-hover:scale-105 transition-transform">{documents.marksheet ? documents.marksheet.name : 'Select PDF / Image'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tab 5: Financial */}
+                        {activeTab === 4 && (
+                            <div className="animate-fade-in-up">
+                                <div className="mb-10 border-b border-gray-100 pb-6 flex items-end gap-4">
+                                    <h3 className="font-serif text-4xl tracking-tight text-gray-900 leading-none">Financial Routing</h3>
+                                    <span className="text-violet-600 font-mono font-bold text-sm bg-violet-50 px-2 py-1 rounded-md mb-1">05</span>
+                                </div>
+                                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-10 flex items-start gap-4 shadow-inner">
+                                    <AlertCircle className="text-amber-500 mt-0.5 flex-shrink-0" size={20} />
+                                    <p className="text-sm text-amber-900 font-medium leading-relaxed font-serif m-0 p-0 line-clamp-none">Ensure your routing numbers perfectly match the attached documents. Discrepancies will trigger an automated AI rejection and delay disbursement by up to 14 days.</p>
+                                </div>
+
+                                <div className="space-y-12">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                        <div className="group bg-blue-50/50 p-6 rounded-3xl border border-blue-100 focus-within:ring-4 focus-within:ring-blue-500/10 transition-shadow">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-blue-600/70 mb-3 transition-colors border-none p-0">Target Account Number</label>
+                                            <input name="bankAccountNo" value={formData.financialDetails.bankAccountNo || ''} onChange={(e) => handleChange('financialDetails', e)} className="w-full border-b border-blue-200 py-2 text-2xl font-mono tracking-wider outline-none focus:border-blue-500 bg-transparent text-blue-950 placeholder-blue-300 m-0 p-0" required />
+                                        </div>
+                                        <div className="group bg-blue-50/50 p-6 rounded-3xl border border-blue-100 focus-within:ring-4 focus-within:ring-blue-500/10 transition-shadow">
+                                            <label className="block text-[11px] font-black uppercase tracking-widest text-blue-600/70 mb-3 transition-colors border-none p-0">Bank IFSC Code</label>
+                                            <input name="ifscCode" value={formData.financialDetails.ifscCode || ''} onChange={(e) => handleChange('financialDetails', e)} className="w-full border-b border-blue-200 py-2 text-2xl font-mono tracking-wider outline-none focus:border-blue-500 bg-transparent uppercase text-blue-950 placeholder-blue-300 m-0 p-0" required />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-violet-600/70 mb-2 border-none p-0">Verified Bank Passbook</label>
+                                        <div className="border border-dashed border-violet-200 bg-violet-50/30 rounded-3xl p-10 flex items-center justify-center hover:bg-violet-50 transition-colors cursor-pointer relative group">
+                                            <input type="file" onChange={(e) => handleFileChange('bankPassbook', e)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                                            <span className="text-sm font-bold uppercase tracking-widest text-violet-700 group-hover:scale-105 transition-transform">{documents.bankPassbook ? documents.bankPassbook.name : 'Select PDF / Image'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
+
+                    {/* Bottom Controls (Vibrant Gradient Buttons) */}
+                    <div className="mt-14 pt-8 border-t border-gray-100 flex justify-between items-center relative gap-4">
+                        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-200 to-transparent"></div>
+                        <button
+                            type="button"
+                            onClick={handlePrevTab}
+                            className={`flex items-center gap-3 text-[11px] font-black uppercase tracking-widest transition-all px-6 py-3 rounded-2xl whitespace-nowrap ${activeTab === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100 text-gray-500 hover:text-violet-600 hover:bg-violet-50 border border-transparent hover:border-violet-100'}`}
+                        >
+                            <ArrowLeft size={16} /> Return Step
+                        </button>
+
+                        {activeTab < tabs.length - 1 ? (
+                            <button
+                                type="button"
+                                onClick={handleNextTab}
+                                className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:from-violet-500 hover:to-indigo-500 shadow-xl shadow-violet-500/20 hover:shadow-violet-500/40 hover:-translate-y-1 transition-all flex items-center gap-3 whitespace-nowrap ml-auto"
+                            >
+                                Continue Forward <ArrowRight size={16} />
                             </button>
-                        </div>
-                    )}
-
-                    {/* Section 4: Current Course (Tab 3) - New Placeholder */}
-                    {activeTab === 3 && (
-                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Current Course Details</h2>
-                            <p className="text-gray-500 text-sm">Course selection will be available here.</p>
-                            <button type="button" onClick={handleNextTab} className="mt-4 bg-yellow-400 text-yellow-900 px-6 py-2 rounded font-bold hover:bg-yellow-500 transition-colors shadow-sm text-sm">
-                                Next
+                        ) : (
+                            <button
+                                type="submit"
+                                className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:from-emerald-400 hover:to-teal-400 shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-1 transition-all flex items-center gap-3 border border-emerald-400 whitespace-nowrap ml-auto"
+                            >
+                                {isResubmission ? 'Execute Resubmission' : isRenewal ? 'Execute Renewal' : 'Lodge Formal Application'} <CheckCircle size={16} />
                             </button>
-                        </div>
-                    )}
-
-                    {/* Section 5: Past Qualification (Tab 4) */}
-                    {activeTab === 4 && (
-                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Past Qualification Information</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Previous Year Percentage (%)</label>
-                                    <input
-                                        name="previousYearPercentage"
-                                        type="number"
-                                        value={formData.academicDetails.previousYearPercentage || ''}
-                                        onChange={(e) => handleChange('academicDetails', e)}
-                                        className="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-yellow-400 outline-none"
-                                        placeholder="e.g. 85.5"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Attendance Percentage</label>
-                                    <input name="attendancePercentage" value={formData.academicDetails.attendancePercentage || ''} onChange={(e) => handleChange('academicDetails', e)} className="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-yellow-400 outline-none" placeholder="e.g. 90" required />
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Upload Marksheet</label>
-                                    <input type="file" onChange={(e) => handleFileChange('marksheet', e)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300" />
-                                </div>
-                                <button type="button" onClick={handleNextTab} className="bg-yellow-400 text-yellow-900 px-6 py-2 rounded font-bold hover:bg-yellow-500 transition-colors shadow-sm text-sm">
-                                    Next
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Section 6: Apply Scholarship / Final Tab (Tab 5) - Bank Info + Submit */}
-                    {activeTab === 5 && (
-                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Bank Information & Submission</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">Bank Account No.</label>
-                                    <input name="bankAccountNo" value={formData.financialDetails.bankAccountNo || ''} onChange={(e) => handleChange('financialDetails', e)} className="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-yellow-400 outline-none" required />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-600 text-sm mb-1">IFSC Code</label>
-                                    <input name="ifscCode" value={formData.financialDetails.ifscCode || ''} onChange={(e) => handleChange('financialDetails', e)} className="w-full border p-2 rounded text-sm focus:ring-2 focus:ring-yellow-400 outline-none" required />
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Upload Bank Passbook</label>
-                                    <input type="file" onChange={(e) => handleFileChange('bankPassbook', e)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300" />
-                                </div>
-                            </div>
-
-                            <div className="text-center mt-8">
-                                <button type="submit" className="bg-yellow-400 w-full text-yellow-900 px-10 py-3 rounded font-bold hover:bg-yellow-500 shadow-lg transform hover:-translate-y-1 transition-all">
-                                    {isResubmission ? 'Resubmit Application' : isRenewal ? 'Submit Renewal' : 'Submit Application'}
-                                </button>
-                                <p className="text-xs text-gray-500 mt-2">Please review all information before submitting. You cannot edit after submission.</p>
-                            </div>
-                        </div>
-                    )}
-
+                        )}
+                    </div>
                 </form>
             </div>
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+                .animate-fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+            `}} />
         </div>
     );
 };

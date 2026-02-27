@@ -1,4 +1,4 @@
-import { BarChart3, Search, GraduationCap, Users, User, MessageSquare, HelpCircle, ArrowLeft } from 'lucide-react';
+import { BarChart3, Search, GraduationCap, Users, User, MessageSquare, HelpCircle, ArrowLeft, Globe } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Public = () => {
@@ -6,109 +6,142 @@ const Public = () => {
 
     const services = [
         {
-            title: "Dashboard",
+            title: "Open Data Dashboard",
             icon: BarChart3,
-            desc: "Visualization of the statistical data available on NSP regarding the receipt and processing of scholarship applications in schemes onboarded on NSP.",
-            linkText: "View all",
+            desc: "Access aggregated statistical visualization regarding the receipt, status, and processing volume of system-wide applications.",
+            linkText: "View Analytics",
             link: "/student/dashboard", // Or a public dashboard if it existed
-            color: "text-[#00AEEF]" // Cyan/Blue
+            color: "text-blue-600",
+            bgColor: "bg-blue-50",
+            borderColor: "border-blue-100"
         },
         {
-            title: "Scholarship Schemes",
+            title: "Scheme Registry",
             icon: Search,
-            desc: "Search Schemes available on NSP",
-            linkText: "Search now!",
+            desc: "Browse and search the centralized registry of all active scholarship programs onboarded onto the portal infrastructure.",
+            linkText: "Search Schemes",
             link: "/schemes",
-            color: "text-[#00AEEF]"
+            color: "text-indigo-600",
+            bgColor: "bg-indigo-50",
+            borderColor: "border-indigo-100"
         },
         {
-            title: "Scholarship Eligibility",
+            title: "Eligibility Frameworks",
             icon: GraduationCap,
-            desc: "Know your eligibility for different scholarship schemes available on Smart Scholarship Portal.",
-            linkText: "View",
+            desc: "Review defined parameters and criteria combinations to determine potential applicant eligibility across available schemes.",
+            linkText: "Check Criteria",
             link: "/eligibility",
-            color: "text-[#00AEEF]"
+            color: "text-slate-700",
+            bgColor: "bg-slate-100",
+            borderColor: "border-slate-200"
         },
-
         {
-            title: "Grievance Registration",
+            title: "Dispute Registry",
             icon: MessageSquare,
-            desc: "Register Your Grievance or Check Status",
-            linkText: "View",
+            desc: "Initiate formal grievance tickets or track the resolution status of existing logged complaints and operational issues.",
+            linkText: "File Grievance",
             link: "/grievance",
-            color: "text-[#00AEEF]"
+            color: "text-rose-600",
+            bgColor: "bg-rose-50",
+            borderColor: "border-rose-100"
         },
         {
-            title: "NSP Helpdesk",
+            title: "System Helpdesk",
             icon: HelpCircle,
-            desc: "NSP Helpdesk",
-            linkText: "View",
+            desc: "Obtain administrative support, review frequently asked questions, or contact technical operatives for issue mitigation.",
+            linkText: "Access Support",
             link: "/helpdesk",
-            color: "text-[#00AEEF]"
+            color: "text-teal-600",
+            bgColor: "bg-teal-50",
+            borderColor: "border-teal-100"
         },
 
     ];
 
     return (
-        <div className="min-h-screen bg-white font-sans text-gray-800 flex flex-col">
-            {/* Header / Back Button */}
-            <div className="bg-white p-4 border-b">
-                <div className="container mx-auto flex items-center justify-between">
+        <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-800 flex flex-col selection:bg-blue-600 selection:text-white relative overflow-hidden">
+            {/* Background Details */}
+            <div className="absolute top-0 inset-x-0 h-[400px] bg-gradient-to-b from-slate-200/50 to-transparent -z-10"></div>
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/40 rounded-full filter blur-[100px] -translate-y-1/2 translate-x-1/3 -z-10"></div>
+
+            {/* Header / Command Bar */}
+            <div className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <button onClick={() => navigate('/')} className="hover:bg-gray-100 p-2 rounded-full transition-colors">
-                            <ArrowLeft className="w-6 h-6 text-gray-600" />
+                        <button onClick={() => navigate('/')} className="p-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 transition-colors shadow-sm group">
+                            <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
                         </button>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-xl font-bold text-gray-800">Public</h1>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="container mx-auto px-6 py-12 flex-1">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                    {services.map((item, index) => (
-                        <div
-                            key={index}
-                            className={`flex flex-col items-start p-6 rounded-lg transition-all hover:shadow-lg bg-white
-                                ${item.isHighlight ? 'border border-[#00AEEF]' : 'border-0'}
-                            `}
-                        >
-                            <div className="mb-4 text-[#00AEEF]">
-                                <item.icon className="w-12 h-12" strokeWidth={1.5} />
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-blue-900 text-white flex items-center justify-center shadow-md">
+                                <Globe size={20} />
                             </div>
-
-                            <h3 className="text-lg font-bold text-gray-800 mb-2">
-                                {item.title}
-                            </h3>
-
-                            <p className="text-xs text-gray-500 mb-4 leading-relaxed min-h-[40px]">
-                                {item.desc}
-                            </p>
-
-                            <Link
-                                to={item.link}
-                                className="text-xs font-bold text-gray-800 border-b border-gray-800 hover:text-[#00AEEF] hover:border-[#00AEEF] transition-colors mt-auto"
-                            >
-                                {item.linkText}
-                            </Link>
+                            <div>
+                                <h1 className="text-xl font-bold tracking-tight text-blue-950 leading-none mb-1">Public Access</h1>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Open Data & Information</p>
+                            </div>
                         </div>
-                    ))}
+                    </div>
                 </div>
             </div>
 
-            {/* Scale/Logos Footer */}
-            <div className="bg-gray-50 py-8 border-t mt-auto">
-                <div className="container mx-auto px-4 text-center">
-                    <div className="flex flex-wrap justify-center gap-8 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-                        {/* Logos removed for college project */}
-                    </div>
-                    <div className="text-[10px] text-gray-400 mt-4 space-x-4">
-                        <a href="#">Copyright Policy</a> | <a href="#">Privacy Policy</a> | <a href="#">Terms and Conditions</a> | <a href="#">Disclaimer</a> | <a href="#">Hyperlink</a> | <a href="#">Site Map</a>
-                    </div>
-                    <p className="text-[10px] text-gray-400 mt-2">Last update on October 2026</p>
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 flex-1 w-full">
+                <div className="text-center max-w-2xl mx-auto mb-16 animate-fade-in-up">
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4 tracking-tight">Public <span className="text-blue-700">Services</span></h2>
+                    <p className="text-slate-600 leading-relaxed text-lg">
+                        Open-access resources including statistical dashboards, scheme registries, and formalized support channels for general citizens.
+                    </p>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {services.map((item, index) => (
+                        <div key={index} className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm hover:shadow-lg hover:border-blue-200 transition-all duration-300 group flex flex-col h-full relative overflow-hidden animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-slate-50 to-transparent -z-10 opacity-50 group-hover:from-blue-50 transition-colors"></div>
+
+                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 ${item.bgColor} ${item.color} border ${item.borderColor} shadow-sm group-hover:scale-110 transition-transform duration-300`}>
+                    <item.icon strokeWidth={1.5} size={28} />
+                </div>
+
+                <h3 className="text-xl font-bold text-slate-800 mb-3 group-hover:text-blue-800 transition-colors">
+                    {item.title}
+                </h3>
+
+                <p className="text-sm text-slate-600 mb-8 leading-relaxed flex-grow font-medium">
+                    {item.desc}
+                </p>
+
+                <Link to={item.link} className="inline-flex items-center justify-center w-full py-3.5 px-4 rounded-xl text-sm font-bold uppercase tracking-widest bg-slate-50 text-slate-700 border border-slate-200 hover:bg-white hover:border-blue-300 hover:text-blue-700 transition-all shadow-sm">
+                    {item.linkText}
+                </Link>
+        </div>
+    ))
+}
+                </div >
+            </main >
+
+    {/* Specialized Footer replacing the old generic one */ }
+    < footer className = "border-t border-slate-200 bg-white mt-auto" >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                <a href="#" className="hover:text-blue-600 transition-colors">Policy</a>
+                <span className="text-slate-300">|</span>
+                <a href="#" className="hover:text-blue-600 transition-colors">Privacy</a>
+                <span className="text-slate-300">|</span>
+                <a href="#" className="hover:text-blue-600 transition-colors">Terms</a>
+                <span className="text-slate-300">|</span>
+                <a href="#" className="hover:text-blue-600 transition-colors">Sitemap</a>
             </div>
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                System Build V-2026.10
+            </div>
+        </div>
+            </footer >
+
+    <style dangerouslySetInnerHTML={{
+        __html: `
+                @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+                .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+            `}} />
         </div>
     );
 };

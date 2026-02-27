@@ -1,7 +1,8 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Loader2 } from 'lucide-react';
 import AuthContext from '../context/AuthContext';
 import api from '../services/api';
+import ReactMarkdown from 'react-markdown';
 
 const CampusAI = () => {
     const { user } = useContext(AuthContext);
@@ -11,6 +12,15 @@ const CampusAI = () => {
     ]);
     const [input, setInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     const handleSend = async () => {
         if (!input.trim() || isTyping) return;
@@ -60,8 +70,14 @@ const CampusAI = () => {
                     </div>
                     <div className="h-64 overflow-y-auto p-4 bg-gray-50 flex flex-col gap-3">
                         {messages.map((msg, idx) => (
-                            <div key={idx} className={`p-2 rounded-lg text-xs max-w-[80%] whitespace-pre-wrap ${msg.isBot ? 'bg-white border self-start text-gray-700' : 'bg-blue-600 text-white self-end'}`}>
-                                {msg.text}
+                            <div key={idx} className={`p-3 rounded-lg text-sm max-w-[85%] ${msg.isBot ? 'bg-white border self-start text-gray-800 shadow-sm' : 'bg-blue-600 text-white self-end shadow-sm'}`}>
+                                {msg.isBot ? (
+                                    <div className="markdown-body prose prose-sm max-w-none prose-p:leading-snug prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                                    </div>
+                                ) : (
+                                    <div className="whitespace-pre-wrap">{msg.text}</div>
+                                )}
                             </div>
                         ))}
                         {isTyping && (
@@ -70,6 +86,7 @@ const CampusAI = () => {
                                 Analyzing...
                             </div>
                         )}
+                        <div ref={messagesEndRef} />
                     </div>
                     <div className="p-3 bg-white border-t flex gap-2">
                         <input
